@@ -1,4 +1,6 @@
 const gameContainer = document.getElementById("game");
+const startBtn = document.querySelector("#start");
+const restartBtn = document.querySelector("#restart");
 let firstCard; 
 let secondCard;
 let numClicks = 0;
@@ -80,8 +82,11 @@ function handleCardClick(event) {
     secondCard = clickedDiv;
     if (firstCard.className === secondCard.className) {
       numMatches++;
-      console.log(`You matched ${firstCard.className}!`)
       numClicks = 0;
+
+      if (numMatches === COLORS.length / 2) {
+        restartBtn.style.visibility = "visible";
+      }
     } else {
       setTimeout(function() {
         firstCard.style.backgroundColor = "white";
@@ -93,5 +98,19 @@ function handleCardClick(event) {
   }
 }
 
-// when the DOM loads
-createDivsForColors(shuffledColors);
+startBtn.addEventListener("click", function() {
+  createDivsForColors(shuffledColors);
+  startBtn.style.display = "none";
+})
+
+restartBtn.addEventListener("click", function() {
+  while (gameContainer.firstChild) {
+    gameContainer.removeChild(gameContainer.firstChild);
+  }
+
+  shuffledColors = shuffle(COLORS);
+  createDivsForColors(shuffledColors);
+  restartBtn.style.display = "hidden";
+})
+
+restartBtn.style.visibility = "hidden";
