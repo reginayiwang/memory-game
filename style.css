@@ -1,7 +1,86 @@
-#game div {
-  border: 1px solid black;
-  width: 15%;
-  height: 200px;
-  margin: 10px;
+body {
+  background-color: rgb(228, 197, 158);
+}
+
+#page { 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+h1 {
+  font-family: "Pacifico", cursive;
+  font-size: 40px;
+  color: rgb(128, 61, 59);
+  margin: 0;
+}
+
+#buttondiv {
+  height: 50px;
+}
+
+button {
+  background-color: #fbeee0;
+  border: 2px solid #422800;
+  border-radius: 30px;
+  box-shadow: #422800 4px 4px 0 0;
+  color: #422800;
+  cursor: pointer;
   display: inline-block;
+  font-weight: 600;
+  font-size: 14px;
+  font-family: cursive;
+  padding: 0 10px;
+  line-height: 30px;
+  text-align: center;
+  text-decoration: none;
+  touch-action: manipulation;
+}
+
+button:hover {
+  background-color: #fff;
+}
+
+#game {
+  display: grid;
+  place-content: center;
+  grid-template-columns: 150px 150px 150px 150px;
+  grid-gap: 10px;
+}
+
+
+.card {
+  height: 150px;
+  border-radius: 50%;
+  position: relative;
+}
+
+.cardBack, .cardFront {
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
+  border-radius: 50%;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+  transition: transform 0.5s ease;
+  position: absolute;
+  backface-visibility: hidden;
+}
+
+.cardBack {
+  transform: rotateY(180deg);
+}
+
+.cardBack.flipped {
+  transform: rotateY(0deg);
+}
+
+.cardFront {
+  transform: rotateY(0deg);
+}
+
+.cardFront.flipped {
+  transform: rotateY(180deg);
 }

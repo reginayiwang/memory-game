@@ -1,23 +1,12 @@
+const dogApi = 'https://dog.ceo/api/breeds/image/random/8';
+const pawImg = 'paw.png'
 const gameContainer = document.getElementById("game");
 const startBtn = document.querySelector("#start");
 const restartBtn = document.querySelector("#restart");
-let firstCard; 
-let secondCard;
+let prevCard; 
 let numClicks = 0;
 let numMatches = 0;
-
-const COLORS = [
-  "red",
-  "blue",
-  "green",
-  "orange",
-  "purple",
-  "red",
-  "blue",
-  "green",
-  "orange",
-  "purple"
-];
+let dogs = []
 
 // here is a helper function to shuffle an array
 // it returns the same array with values shuffled
@@ -42,55 +31,65 @@ function shuffle(array) {
   return array;
 }
 
-let shuffledColors = shuffle(COLORS);
-
-// this function loops over the array of colors
-// it creates a new div and gives it a class with the value of the color
-// it also adds an event listener for a click for each card
-function createDivsForColors(colorArray) {
-  for (let color of colorArray) {
+function createDivs(arr) {
+  for (let item of arr) {
     // create a new div
     const newDiv = document.createElement("div");
 
     // give it a class attribute for the value we are looping over
-    newDiv.classList.add(color);
+    const urlSections = item.split("/")
+    newDiv.className = `card ${urlSections[urlSections.length-1]}`;
 
     // call a function handleCardClick when a div is clicked on
     newDiv.addEventListener("click", handleCardClick);
 
+    const newFront = document.createElement("div");
+    newFront.classList.add("cardFront");
+    newFront.style.backgroundImage = `url(${pawImg})`;
+
+    const newBack = document.createElement("div");
+    newBack.classList.add("cardBack")
+    newBack.style.backgroundImage =`url(${item})`;
+
+    newDiv.appendChild(newFront);
+    newDiv.appendChild(newBack);
     // append the div to the element with an id of game
     gameContainer.append(newDiv);
   }
 }
 
 function handleCardClick(event) {
-  numClicks++;
-  let clickedDiv = event.target;
+  // Ignore clicks on revealed cards, preventing "matches" on the same card and matches 
+  // that have already been discovered
+  if (event.target.classList[0] === "cardBack") {
+    return;
+  }
 
+  let clickedCard = event.target.parentElement;
+  numClicks++;
+
+  // Flip card, allowing only 2 flipped cards at at ime
   if (numClicks <= 2) {
-    clickedDiv.style.backgroundColor = clickedDiv.className;
+    clickedCard.childNodes.forEach((div) => {div.classList.toggle('flipped')});
   }
   
   if (numClicks === 1) {
-    firstCard = clickedDiv;
+    prevCard = clickedCard;
   } else if (numClicks === 2) {
-    if (firstCard === clickedDiv) {
-      numClicks = 1;
-      return;
-    }
-
-    secondCard = clickedDiv;
-    if (firstCard.className === secondCard.className) {
+    // Check if there's a match
+    if (prevCard.className === clickedCard.className) {
       numMatches++;
       numClicks = 0;
 
-      if (numMatches === COLORS.length / 2) {
-        restartBtn.style.visibility = "visible";
+      // Check if all cards have been matched
+      if (numMatches === dogs.length) {
+        restartBtn.style.display = "block";
       }
     } else {
+      // Flip unmatching cards over after a second
       setTimeout(function() {
-        firstCard.style.backgroundColor = "white";
-        secondCard.style.backgroundColor = "white";
+        prevCard.childNodes.forEach((div) => {div.classList.toggle('flipped')});
+        clickedCard.childNodes.forEach((div) => {div.classList.toggle('flipped')});
         numClicks = 0;
       }, 1000
       )
@@ -98,19 +97,27 @@ function handleCardClick(event) {
   }
 }
 
-startBtn.addEventListener("click", function() {
-  createDivsForColors(shuffledColors);
-  startBtn.style.display = "none";
-})
+async function getDogPhotos() {
+  const response = await fetch(dogApi);
+  const data = await response.json();
+  return data.message;
+}
 
-restartBtn.addEventListener("click", function() {
+async function setUpGame(event) {
+  event.target.style.display = "none";
+  dogs = await getDogPhotos();
+  createDivs(shuffle(dogs.concat(dogs)))
+}
+
+startBtn.addEventListener("click", setUpGame)
+
+restartBtn.addEventListener("click", function(event) {
   while (gameContainer.firstChild) {
     gameContainer.removeChild(gameContainer.firstChild);
   }
-
-  shuffledColors = shuffle(COLORS);
-  createDivsForColors(shuffledColors);
-  restartBtn.style.display = "hidden";
+  
+  numMatches = 0;
+  setUpGame(event);
 })
 
-restartBtn.style.visibility = "hidden";
+restartBtn.style.display = "none";
